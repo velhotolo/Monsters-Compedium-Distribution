@@ -1,0 +1,10 @@
+# local databases (never commit someone's campaign)
+data/
+*.db
+*.db-wal
+*.db-shm
+
+# logs and build output
+logs/
+*.log
+build/
