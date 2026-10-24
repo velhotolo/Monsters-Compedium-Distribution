@@ -12,7 +12,10 @@ local PushButton = lwtk.PushButton
 local TextLabel = lwtk.TextLabel
 local TitleText = lwtk.TitleText
 local Space = lwtk.Space
-local monsters = {}
+local monster_list = {}
+local actual_index = 1
+local rendered_sheet = nil
+local sheet_area = lwtk.Column {}
 
 local name = lwtk.TextInput { text = "name" }
 local category = lwtk.TextInput { text = "category" }
@@ -37,6 +40,7 @@ local app = lwtk.Application("Bestiary 1.0")
 app:addStyle(require("dark_theme"))
 local win = lwtk.Window
 
+
 local function adder()
     local nameText = name.text or "name"
     local categoryText = category.text or "dragonkin"
@@ -47,6 +51,7 @@ local function adder()
     local appearingText = appearing.text or 6
     local saving_throwsText = saving_throws.text or "F1"
     local moraleText = morale.text or 8
+    local moveText = move.text or 60
     local intelligenceText = intelligence.text or 10
     local alignmentText = alignment.text or "neutral"
     local treasureText = treasure.text or "B"
@@ -54,7 +59,7 @@ local function adder()
     local number_of_attacksText = number_of_attacks.text or 1
     local damageText = damage.text or "1-6"
 
-    local id, err = pcall(db.create, {
+    local success, return_id = pcall(db.create,
         nameText,
         categoryText,
         descriptionText,
@@ -64,91 +69,76 @@ local function adder()
         appearingText,
         saving_throwsText,
         moraleText,
+        moveText,
         intelligenceText,
         alignmentText,
         treasureText,
         xp_valueText,
         number_of_attacksText,
         damageText
-    })
+    )
 
-    if id then
-        print("Monster created!")
-        table.insert(monsters, id)
+
+    if success and return_id then
+        print("Save with id:", return_id)
+        return return_id
     else
-        print("ERROR: ", err)
-    end
-    return true
-end
-
-local function refresh()
-    if #monsters > 0 then
-        monsters = db.fetch_all()
-        return monsters
-    end
-
-    if win.view then
-        win.view:postRedisplay()
+        print("ERROR: ", return_id)
+        return nil
     end
 end
 
+local function writter(m)
+    if not m then return lwtk.Column {} end
 
-
-local function writter()
     local registered1 = Column {
-        Row {
+        lwtk.Box { Row {
             Column { Space {},
                 TitleText { text = "GENERAL INFO" },
-                TextLabel { text = "Name:" },
-                TextLabel { text = name.text },
-                TextLabel { text = "Category" },
-                TextLabel { text = category.text },
-                TextLabel { text = "Alignment" },
-                TextLabel { text = alignment.text },
-                TextLabel { text = "Treasure" },
-                TextLabel { text = treasure.text },
-                TextLabel { text = "Number of Appearence:" },
-                TextLabel { text = appearing.text },
-                Row {
-                    TextLabel { text = "Description:" }
-                },
-                Row {
-                    TextLabel { text = description.text },
-                    Space {},
-                },
-
+                TextLabel { text = "Name: " .. m.name },
+                TextLabel { text = "Category: " .. m.category },
+                TextLabel { text = "Alignment: " .. m.alignment },
+                TextLabel { text = "Treasure: " .. m.treasure },
+                TextLabel { text = "Appearing: " .. m.appearing },
+                TextLabel { text = "Description:" },
+                TextLabel { text = m.description },
+                Space {},
             },
-        },
-        Space {},
+        } },
     }
 
-    local registered2 = Column {
+    local registered2 = lwtk.Box { Column {
         TitleText { text = "COMBAT STATS" },
-        TextLabel { text = "Armor Class:" },
-        TextLabel { text = tostring(armor_class.text) },
-        TextLabel { text = "THAC0:" },
-        TextLabel { text = tostring(thac0.text) },
-        TextLabel { text = "Hit Dice:" },
-        TextLabel { text = tostring(hit_dice.text) },
-        TextLabel { text = "Damage:" },
-        TextLabel { text = tostring(damage.text) },
-        TextLabel { text = "Move:" },
-        TextLabel { text = tostring(move.text) },
-        TextLabel { text = "Morale:" },
-        TextLabel { text = tostring(morale.text) },
-        TextLabel { text = "Intelligence:" },
-        TextLabel { text = tostring(intelligence.text) },
-        TextLabel { text = "Saving Throws:" },
-        TextLabel { text = saving_throws.text },
-        TextLabel { text = "XP Value:" },
-        TextLabel { text = tostring(xp_value.text) },
+        TextLabel { text = "Armor Class: " .. tostring(m.armor_class) },
+        TextLabel { text = "THAC0: " .. tostring(m.thac0) },
+        TextLabel { text = "Hit Dice: " .. tostring(m.hit_dice) },
+        TextLabel { text = "Damage: " .. tostring(m.damage) },
+        TextLabel { text = "Move: " .. tostring(m.move) },
+        TextLabel { text = "Morale: " .. tostring(m.morale) },
+        TextLabel { text = "Intelligence: " .. tostring(m.intelligence) },
+        TextLabel { text = "Saving Throws: " .. tostring(m.saving_throws) },
+        TextLabel { text = "XP Value: " .. tostring(m.xp_value) },
         Space {},
+    },
     }
 
     return Row { registered1, Space {}, registered2 }
 end
 
-listContainer = Column {
+local function update_sheet()
+    if rendered_sheet then
+        sheet_area:removeChild(rendered_sheet)
+        rendered_sheet = nil
+    end
+
+    if #monster_list > 0 then
+        local monster = monster_list[actual_index]
+        rendered_sheet = writter(monster)
+        sheet_area:addChild(rendered_sheet)
+    end
+end
+
+listContainer = lwtk.Box { Column {
     Row {
         Column {
             TitleText { text = "GENERAL INFO" },
@@ -167,18 +157,19 @@ listContainer = Column {
             },
             Row {
                 description, },
-
         },
-
     },
+},
 }
 
 buttons = Row { PushButton {
     text = "Add",
-    onClicked = function(self)
-        local layout2 = writter()
-        if adder() then
-            self:byId("registered"):addChild(layout2)
+    onClicked = function()
+        local new_id = adder()
+        if new_id then
+            monster_list = db.get_all() or {}
+            actual_index = #monster_list
+            update_sheet()
         end
     end
 },
@@ -194,7 +185,7 @@ buttons = Row { PushButton {
     },
 }
 
-filterStats = Column { Row { TextLabel { text = "Filter by XP Value:" } },
+filterStats = lwtk.Box { Column { Row { TextLabel { text = "Filter by XP Value:" } },
     Row { filterXpValue },
     Row {
         PushButton {
@@ -221,15 +212,11 @@ filterStats = Column { Row { TextLabel { text = "Filter by XP Value:" } },
         text = "Clear",
         onClicked = function()
         end },
-
-    }
-
-
+    },
+},
 }
 
-
-
-combatStats = Column {
+combatStats = lwtk.Box { Column {
     TitleText { text = "COMBAT STATS" },
     Space {},
     TextLabel { text = "Armor Class:" },
@@ -259,26 +246,44 @@ combatStats = Column {
     TextLabel { text = "XP Value:" },
     xp_value,
     Space {}
+},
 }
 
 registeredMonsters = Column {
     id = "registered",
-    Space {}, TitleText { text = "REGISTERED MONSTERS" },
-    Row { PushButton {
-        text = "<=",
-        onClicked = function()
-        end }, Space {}, Space {},
+    TitleText { text = "REGISTERED MONSTERS" },
+    sheet_area,
+    Space {},
+    Row { lwtk.Box {
         PushButton {
-            text = "=>",
+            text = "<=",
             onClicked = function()
-            end } },
-    Space {},
-    Space {},
-    Space {},
-    Space {},
-    Space {},
-    Space {},
-    Space {},
+                if actual_index > 1 then
+                    actual_index = actual_index - 1
+                    update_sheet()
+                end
+            end
+        } },
+        Space {},
+        lwtk.Box {
+            PushButton {
+                text = "Get PDF",
+                onClicked = function()
+                end
+            }, Space {},
+        },
+        lwtk.Box {
+            PushButton {
+                text = "=>",
+                onClicked = function()
+                    if actual_index < #monster_list then
+                        actual_index = actual_index + 1
+                        update_sheet()
+                    end
+                end
+            },
+        },
+    },
 }
 
 
@@ -295,7 +300,6 @@ diagram = Row {
 
 win = app:newWindow {
     title = "BESTIARY 1.0",
-    size = { 1200, 1900 },
     diagram,
 }
 win:show()

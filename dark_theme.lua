@@ -25,6 +25,9 @@ return {
     -- Titles (TitleText) in gold
     { "TextColor@TitleText",                        GOLD },
 
+    { "TextSize@FieldLabel",                        24 },
+    { "TextSize@FieldValue",                        20 },
+
     -- Text inputs
     { "BackgroundColor@TextInput",                  FIELD },
     { "BorderColor@TextInput",                      BORDER },

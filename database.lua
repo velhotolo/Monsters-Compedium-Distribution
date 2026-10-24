@@ -19,38 +19,56 @@ db:exec([[
     treasure TEXT NOT NULL,
     xp_value INTEGER NOT NULL DEFAULT 5,
     number_of_attacks INTEGER NOT NULL DEFAULT 1,
-    damage TEXT NOT NULL	
+    damage TEXT NOT NULL
+    )
 ]])
 
 local M = {}
 
 function M.get_all()
     local stmt = db:prepare(
-        "SELECT id, name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, intelligence, alignment, treasure, xp_value, number_of_attacks, damage FROM monsters")
+        "SELECT id, name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, move, intelligence, alignment, treasure, xp_value, number_of_attacks, damage FROM monsters")
 
-    if not stmt then
-        return nil
-    end
+    if not stmt then return nil end
 
+    local results = {} -- Tabela local para os dados
     while stmt:step() == sqlite3.ROW do
         local row = stmt:get_named_values()
-        table.insert(M, row)
+        table.insert(results, row)
     end
 
     stmt:finalize()
-    return M
+    return results -- Retorna a tabela limpa
 end
 
-function M.create(name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale,
+function M.get_by_id(id)
+    local stmt = db:prepare(
+        "SELECT name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, move, intelligence, alignment, treasure, xp_value, number_of_attacks, damage FROM monsters WHERE id = ?")
+    if not stmt then
+        return nil
+    end
+
+    stmt:bind_values(id)
+
+    local monster = nil
+    if stmt:step() == sqlite3.ROW then
+        monster = stmt:get_named_values()
+    end
+
+    stmt:finalize()
+    return monster
+end
+
+function M.create(name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, move,
                   intelligence, alignment, treasure, xp_value, number_of_attacks, damage)
     local stmt = db:prepare(
-        "INSERT INTO monsters (name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, intelligence, alignment, treasure, xp_value, number_of_attacks, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
+        "INSERT INTO monsters (name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, move, intelligence, alignment, treasure, xp_value, number_of_attacks, damage) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
     if not stmt then
         return nil
     end
 
-    stmt:bind_values(name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale,
+    stmt:bind_values(name, category, description, armor_class, hit_dice, thac0, appearing, saving_throws, morale, move,
         intelligence, alignment, treasure, xp_value, number_of_attacks, damage)
 
     local res = stmt:step()
@@ -69,6 +87,12 @@ function M.delete(id)
     stmt:finalize()
 
     return res == sqlite3.DONE and db:changes() > 0
+end
+
+function lastId()
+    for id in db:urows("SELECT max(id) FROM monsters") do
+        return id
+    end
 end
 
 return M
