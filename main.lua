@@ -216,7 +216,7 @@ filterStats = lwtk.Box { Column { Row { TextLabel { text = "Filter by XP Value:"
 },
 }
 
-combatStats = lwtk.Box { Column {
+combatStats = Column {
     TitleText { text = "COMBAT STATS" },
     Space {},
     TextLabel { text = "Armor Class:" },
@@ -246,7 +246,6 @@ combatStats = lwtk.Box { Column {
     TextLabel { text = "XP Value:" },
     xp_value,
     Space {}
-},
 }
 
 registeredMonsters = Column {
@@ -270,8 +269,9 @@ registeredMonsters = Column {
                 text = "Get PDF",
                 onClicked = function()
                 end
-            }, Space {},
+            },
         },
+        Space {},
         lwtk.Box {
             PushButton {
                 text = "=>",
