@@ -20,18 +20,22 @@ return {
     { "AccentColor",                                GOLD },
     { "CursorColor",                                Color "00000000" }, -- cursor hidden without focus
     { "CursorColor:focused",                        GOLD },
-    { "BorderColor@Box",                            BORDER },
+    { "BorderColor@Box",                            GOLD },
 
     -- Titles (TitleText) in gold
     { "TextColor@TitleText",                        GOLD },
 
-    { "TextSize@FieldLabel",                        24 },
-    { "TextSize@FieldValue",                        20 },
+
+    { "TextSize@TextLabel",                         20 },
+    { "TextSize@TextValue",                         14 },
+
+
 
     -- Text inputs
     { "BackgroundColor@TextInput",                  FIELD },
     { "BorderColor@TextInput",                      BORDER },
     { "BorderColor@TextInput:focused",              get "AccentColor" },
+    { "TextSize@TextInput",                         16 },
 
     -- Buttons, in each state
     { "BackgroundColor@PushButton",                 BUTTON },
