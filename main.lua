@@ -16,70 +16,54 @@ local monster_list = {}
 local actual_index = 1
 local rendered_sheet = nil
 local sheet_area = lwtk.Column {}
-
-local name = lwtk.TextInput { text = "name" }
-local category = lwtk.TextInput { text = "category" }
-local description = lwtk.TextInput { text = "a description" }
-local armor_class = lwtk.TextInput { text = 10 }
-local hit_dice = lwtk.TextInput { text = 1 }
-local thac0 = lwtk.TextInput { text = 20 }
-local appearing = lwtk.TextInput { text = "N of Appearence" }
-local saving_throws = lwtk.TextInput { text = "F1" }
-local morale = lwtk.TextInput { text = 6 }
-local move = lwtk.TextInput { text = 60 }
-local intelligence = lwtk.TextInput { text = 10 }
-local alignment = lwtk.TextInput { text = "neutral" }
-local treasure = lwtk.TextInput { text = "B" }
-local xp_value = lwtk.TextInput { text = 5 }
-local number_of_attacks = lwtk.TextInput { text = 1 }
-local damage = lwtk.TextInput { text = "1-6" }
-local filterXpValue = lwtk.TextInput { text = "" }
-local higherThan = lwtk.TextInput { text = "" }
-local lowerThan = lwtk.TextInput { text = "" }
-local filterCategory = lwtk.TextInput { text = "" }
+local name              = lwtk.TextInput()
+local category          = lwtk.TextInput()
+local description       = lwtk.TextInput()
+local armor_class       = lwtk.TextInput()
+local hit_dice          = lwtk.TextInput()
+local thac0             = lwtk.TextInput()
+local appearing         = lwtk.TextInput()
+local saving_throws     = lwtk.TextInput()
+local morale            = lwtk.TextInput()
+local move              = lwtk.TextInput()
+local intelligence      = lwtk.TextInput()
+local alignment         = lwtk.TextInput()
+local treasure          = lwtk.TextInput()
+local xp_value          = lwtk.TextInput()
+local number_of_attacks = lwtk.TextInput()
+local damage            = lwtk.TextInput()
 
 local app = lwtk.Application("Bestiary 1.0")
-app:addStyle(require("dark_theme"))
+app:addStyle(require("silver_theme"))
 local win = lwtk.Window
 
 
+local function getText(widget, default)
+    if not widget.text or widget.text == "" then
+        return default
+    end
+    return widget.text
+end
+
 local function adder()
-    local nameText = name.text or "name"
-    local categoryText = category.text or "dragonkin"
-    local descriptionText = description.text or "descriptions"
-    local armor_classText = armor_class.text or 10
-    local hit_diceText = hit_dice.text or 1
-    local thac0Text = thac0.text or 20
-    local appearingText = appearing.text or 6
-    local saving_throwsText = saving_throws.text or "F1"
-    local moraleText = morale.text or 8
-    local moveText = move.text or 60
-    local intelligenceText = intelligence.text or 10
-    local alignmentText = alignment.text or "neutral"
-    local treasureText = treasure.text or "B"
-    local xp_valueText = xp_value.text or 5
-    local number_of_attacksText = number_of_attacks.text or 1
-    local damageText = damage.text or "1-6"
-
     local success, return_id = pcall(db.create,
-        nameText,
-        categoryText,
-        descriptionText,
-        armor_classText,
-        hit_diceText,
-        thac0Text,
-        appearingText,
-        saving_throwsText,
-        moraleText,
-        moveText,
-        intelligenceText,
-        alignmentText,
-        treasureText,
-        xp_valueText,
-        number_of_attacksText,
-        damageText
+        getText(name, "name"),
+        getText(category, "dragonkin"),
+        getText(description, "descriptions"),
+        getText(armor_class, 10),
+        getText(hit_dice, 1),
+        getText(thac0, 20),
+        getText(appearing, 6),
+        getText(saving_throws, "F1"),
+        getText(morale, 8),
+        getText(move, 60),
+        getText(intelligence, 10),
+        getText(alignment, "neutral"),
+        getText(treasure, "B"),
+        getText(xp_value, 5),
+        getText(number_of_attacks, 1),
+        getText(damage, "1-6")
     )
-
 
     if success and return_id then
         print("Save with id:", return_id)
@@ -90,17 +74,21 @@ local function adder()
     end
 end
 
+local function makeField(label, widget)
+    return Row { TextLabel { text = label }, widget }
+end
+
 local function writter(m)
     if not m then return lwtk.Column {} end
 
     local registered1 = Column {
-        lwtk.Box { Row {
+        Row {
             Column {
-                TitleText { text = "GENERAL INFO" },
+              lwtk.Box{TitleText { text = "GENERAL INFO" }},
                 TextLabel { text = "Name: " },
-                TextLabel { style = { { "TextSize", 16 } }, text = m.name },
-                TextLabel { text = "Category: " },
-                TextLabel { style = { { "TextSize", 16 } }, text = m.category },
+               TextLabel { style = { { "TextSize", 16 } }, text = m.name },
+               TextLabel { text = "Category: " },
+               TextLabel { style = { { "TextSize", 16 } }, text = m.category },
                 TextLabel { text = "Alignment: " },
                 TextLabel { style = { { "TextSize", 16 } }, text = m.alignment },
                 TextLabel { text = "Treasure: " },
@@ -108,13 +96,11 @@ local function writter(m)
                 TextLabel { text = "Appearing: " },
                 TextLabel { style = { { "TextSize", 16 } }, text = m.appearing },
                 TextLabel { text = "Description:" },
-                TextLabel { style = { { "TextSize", 16 } }, text = m.description },
-                Space {},
-            },
-        } },
+                TextLabel { style = { { "TextSize", 16 } }, text = m.description }
+            } },
     }
 
-    local registered2 = lwtk.Box { Column {
+    local registered2 = Column {
         TitleText { text = "COMBAT STATS" },
         TextLabel { text = "Armor Class: " },
         TextLabel { style = { { "TextSize", 16 } }, text = tostring(m.armor_class) },
@@ -135,7 +121,6 @@ local function writter(m)
         TextLabel { text = "XP Value: " },
         TextLabel { style = { { "TextSize", 16 } }, text = tostring(m.xp_value) },
         Space {},
-    },
     }
 
     return Row { registered1, Space {}, registered2 }
@@ -155,28 +140,19 @@ local function update_sheet()
 end
 
 listContainer = lwtk.Box { Column {
-    Row { Space {},
+
         Column {
-            TitleText { text = "GENERAL INFO" },
-            TextLabel { text = "Name:" },
-            name,
-            TextLabel { text = "Category" },
-            category,
-            TextLabel { text = "Alignment" },
-            alignment,
-            TextLabel { text = "Treasure" },
-            treasure,
-            TextLabel { text = "Number of Appearence:" },
-            appearing,
-            Row {
-                TextLabel { text = "Description:" }
-            },
-            Row {
-                description, },
+             TitleText { text = "GENERAL INFO" } ,
+           Row{TextLabel { text = "Name:         "}, name},
+           Row{TextLabel { text = "Category:   "}, category},Space{},
+           Row{TextLabel { text = "Alignment: "}, alignment},Space{},
+           Row{TextLabel { text = "Treasure:    "}, treasure},Space{},
+            Row{TextLabel { text = "N of App:     " }, appearing},Space{},
+            Row {TextLabel { text = "Description:" }, description, },Space{},
         },
     },
-},
 }
+
 
 buttons = lwtk.Box { Row { PushButton {
     text = "Add",
@@ -202,73 +178,21 @@ buttons = lwtk.Box { Row { PushButton {
 },
 }
 
-filterStats = lwtk.Box { Column { Row { TextLabel { text = "Filter by XP Value:" } },
-    Row { TextLabel { text = ">" }, Space {}, higherThan, Space {} },
-    Row { TextLabel { text = "<" }, Space {}, lowerThan, Space {} },
-    Row {
-        PushButton {
-            text = "Search",
-            onClicked = function()
-            end
-        },
-        PushButton {
-            text = "Clear",
-            onClicked = function()
-            end
-        }
-    },
-
-    Row { TextLabel { text = "Filter by Category:" } },
-
-    Row { filterCategory },
-
-    Row { PushButton {
-        text = "Search",
-        onClicked = function()
-        end
-    }, PushButton {
-        text = "Clear",
-        onClicked = function()
-        end },
-    },
-},
-}
-
 combatStats = lwtk.Box { Column {
-    Row { Space {} }, TitleText { text = "COMBAT STATS" },
-    Space {},
-    TextLabel { text = "Armor Class:" },
-    armor_class,
-    Space {},
-    TextLabel { text = "THAC0:" },
-    thac0,
-    Space {},
-    TextLabel { text = "Hit Dice:" },
-    hit_dice,
-    Space {},
-    TextLabel { text = "Damage:" },
-    damage,
-    Space {},
-    TextLabel { text = "Move:" },
-    move,
-    Space {},
-    TextLabel { text = "Morale:" },
-    morale,
-    Space {},
-    TextLabel { text = "Intelligence:" },
-    intelligence,
-    Space {},
-    TextLabel { text = "Saving Throws:" },
-    saving_throws,
-    Space {},
-    TextLabel { text = "XP Value:" },
-    xp_value,
-    Space {}
-},
-}
+   TitleText { text = "COMBAT STATS" },
+    makeField("Armor Class:   ", armor_class),
+    makeField("THAC0:        ", thac0),
+    makeField("Hit Dice:      ", hit_dice),
+    makeField("Damage:      ", damage),
+    makeField("Move:      ", move),
+    makeField("Morale:    ", morale),
+    makeField("Intelligence:", intelligence),
+    makeField("Saving Throws:", saving_throws),
+    makeField("XP Value:", xp_value)
+} }
+
 
 registeredMonsters = Column {
-    id = "registered",
     sheet_area,
     Space {},
     Row { lwtk.Box {
@@ -305,17 +229,17 @@ registeredMonsters = Column {
 }
 
 
+
+
 diagram = Row {
     Column { listContainer,
-        filterStats
-    },
-    Column { combatStats,
-        buttons
-    },
-    registeredMonsters }
+    combatStats,
+            buttons
+     },
+     registeredMonsters }
 
 win = app:newWindow {
-    title = "BESTIARY 1.0",
+    title = "Bestiary 1.0",
     diagram,
 }
 win:show()

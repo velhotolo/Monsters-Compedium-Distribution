@@ -31,14 +31,14 @@ function M.get_all()
 
     if not stmt then return nil end
 
-    local results = {} -- Tabela local para os dados
+    local results = {} -- Local table for data
     while stmt:step() == sqlite3.ROW do
         local row = stmt:get_named_values()
         table.insert(results, row)
     end
 
     stmt:finalize()
-    return results -- Retorna a tabela limpa
+    return results -- Return clean table
 end
 
 function M.get_by_id(id)
