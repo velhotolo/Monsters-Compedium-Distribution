@@ -89,10 +89,4 @@ function M.delete(id)
     return res == sqlite3.DONE and db:changes() > 0
 end
 
-function lastId()
-    for id in db:urows("SELECT max(id) FROM monsters") do
-        return id
-    end
-end
-
 return M
