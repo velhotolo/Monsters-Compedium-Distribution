@@ -6,11 +6,12 @@
 ![License](https://img.shields.io/badge/license-MIT-blue)
 ![Status](https://img.shields.io/badge/status-work%20in%20progress-orange)
 
-A compendium of **monsters and spells for Dungeons & Dragons 1st Edition**, built to be
+A compendium of **monsters for Dungeons & Dragons 1st Edition**, built to be
 searched quickly behind the GM screen and to be **shared safely with other game masters**.
 
 > 🚧 **Work in progress.** The data layer and the configuration are done; interface needs
 > work. See the [roadmap](#-roadmap) for exactly where things stand.
+> Actually I changed things again. I decided to move all my Lua projects to LÖVE, so basically I need to build this interface from scratch :D
 
 ---
 
@@ -34,7 +35,7 @@ treating security as part of the design, not as something to add at the end.
 ## 🧭 How it works
 
 ```
-Put both .lua files in the same folder, type "lua5.5 main.lua"
+Put both .lua files in the same folder, type "love ."
 ```
 
 ## 🧰 Stack
@@ -43,26 +44,24 @@ Put both .lua files in the same folder, type "lua5.5 main.lua"
 |---|---|---|
 | 🌙 | **Lua** | The whole program. Developed on Lua 5.5; written to run on 5.1+ (older versions not tested yet) |
 | 🗄️ | **SQLite** (`lsqlite3complete`) | The database, as one file. SQLite is bundled, so nothing to install on the system |
-| 🎨 | **LWTK** | Lua GUI library. I'm starting to figure out how it works and it's pretty good. |
+| 🎨 | **LÖVE2D** | Engine for games, handles interfaces really well. At a price. |
 
 **Removed:** Lapis, OpenResty, PostgreSQL, Docker, Nginx.
 ## 🗺️ Roadmap
 
 **Foundation**
 - [x] 🗄️ `db.lua` – SQLite data layer, schema migrations, prepared statements
-- [x] ⚙️ `main.lua` – Call all functions from the Database; also adds filters and show things.
-- [x] ⚙️ `dark_theme.lua` – Testing layout styling capabilities.
+- [ ] ⚙️ `main.lua` – Call all functions from the Database and calculations; also adds filters and show things.
 - [ ] 📄 `LICENSE` (MIT) and dependency list (`.rockspec`)
 - [ ] 🧪 `tests/db_test.lua` – tests for the data layer, using an in-memory database
 
 **Monsters**
 - [ ] 📥 I'll try to export the monsters in a PDF file, but I don't know how, yet. I have
           to study different Lua stuff. 
-- [x] 📜 Stat block page (it's on the right of the interface)
+- [ ] 📜 Stat block page (it's on the right of the interface)
 - [ ] ➕ Add monster form, with safe delete (confirmation popup)
 
 **Distribution**
-- [ ] 📦 Lua files and need to install LWTK
 - [ ] 🏷️ There are file "mergers" out there, for Lua. I'll try something.
 - [ ] 🎲 There's also file builders for different OS. I'll try these too. 
 
@@ -71,7 +70,7 @@ Put both .lua files in the same folder, type "lua5.5 main.lua"
 ## ⚖️ Game content and licensing
 
 - The code is released under the **MIT License**.
-- The program ships with an **empty database**. Monsternstatistics from published
+- The program ships with an **empty database**. Monstern statistics from published
   D&D books are copyrighted, so add your own entries or use content under an open license.
 - *Dungeons & Dragons* is a trademark of Wizards of the Coast. This project is an independent
   fan tool and is not affiliated with or endorsed by them.
@@ -79,10 +78,10 @@ Put both .lua files in the same folder, type "lua5.5 main.lua"
 ## 🤝 The Changes
 
 Initially when I posted this I was thinking about making some kind of API, use ports, write routes and whatnot. 
-And then I realized we don't need this stuff with LWTK and SQLite. I hope you enjoy it anyways...
+And then I realized we don't need this stuff with LÖVE and SQLite. I hope you enjoy it anyways...
 
 ## 🙏 Built with
 
 [Lua](https://www.lua.org/) · 
 [SQLite](https://www.sqlite.org/) · 
-[lwtk](https://github.com/lwtk/lwtk)
+[LOVE2D](https://love2d.org/)
